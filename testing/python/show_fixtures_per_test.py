@@ -326,3 +326,32 @@ def test_should_show_parametrized_fixtures_used_by_test(pytester: Pytester) -> N
             "    indirectly parametrized fixture",
         ]
     )
+
+
+def test_autouse_fixtures(pytester: Pytester) -> None:
+    p = pytester.makepyfile(
+        '''
+        import pytest
+        @pytest.fixture(autouse=True)
+        def auto():
+            """autouse docstring"""
+        @pytest.fixture
+        def manual():
+            """manual docstring"""
+        def test_it(manual):
+            pass
+    '''
+    )
+    result = pytester.runpytest("--fixtures-per-test", p)
+    assert result.ret == 0
+
+    result.stdout.fnmatch_lines(
+        [
+            "*fixtures used by test_it*",
+            "*(test_autouse_fixtures.py:8)*",
+            "auto ?autouse? -- test_autouse_fixtures.py:2",
+            "    autouse docstring",
+            "manual -- test_autouse_fixtures.py:5",
+            "    manual docstring",
+        ]
+    )

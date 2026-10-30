@@ -1200,6 +1200,11 @@ class FixtureDef(Generic[FixtureValue]):
         self._autouse = _autouse
 
     @property
+    def autouse(self) -> bool:
+        """Whether this fixture is an autouse fixture."""
+        return self._autouse
+
+    @property
     def scope(self) -> ScopeName:
         """Scope string, one of "function", "class", "module", "package", "session"."""
         return self._scope.value
@@ -2475,6 +2480,8 @@ def _show_fixtures_per_test(config: Config, session: Session) -> None:
             return
         prettypath = _pretty_fixture_path(invocation_dir, fixture_def.func)
         tw.write(f"{argname}", green=True)
+        if fixture_def.autouse:
+            tw.write(" [autouse]")
         tw.write(f" -- {prettypath}", yellow=True)
         tw.write("\n")
         fixture_doc = inspect.getdoc(fixture_def.func)

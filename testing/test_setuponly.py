@@ -122,9 +122,34 @@ def test_show_fixtures_with_autouse(pytester: Pytester, mode) -> None:
 
     result.stdout.fnmatch_lines(
         [
-            "SETUP    S arg_session*",
+            "SETUP    S arg_session ?autouse?",
             "*SETUP    F arg_function*",
             "*test_arg1 (fixtures used: arg_function, arg_session)*",
+            "*TEARDOWN F arg_function*",
+            "TEARDOWN S arg_session ?autouse?",
+        ]
+    )
+
+
+def test_show_fixtures_with_autouse_and_parameters(pytester: Pytester, mode) -> None:
+    p = pytester.makepyfile(
+        """
+        import pytest
+        @pytest.fixture(scope='session', autouse=True, params=['x'])
+        def arg_session(request):
+            return request.param
+        def test_1():
+            pass
+    """
+    )
+
+    result = pytester.runpytest(mode, p)
+    assert result.ret == 0
+
+    result.stdout.fnmatch_lines(
+        [
+            "SETUP    S arg_session?'x'? ?autouse?",
+            "TEARDOWN S arg_session?'x'? ?autouse?",
         ]
     )
 

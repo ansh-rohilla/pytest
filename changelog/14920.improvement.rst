@@ -1,0 +1,1 @@
+Mark autouse fixtures with ``[autouse]`` in ``--setup-show`` (and friends) and ``--fixtures-per-test`` outputs.
